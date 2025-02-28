@@ -17,6 +17,10 @@
  */
 package org.vaulttec.sonarqube.auth.oidc;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
 import org.junit.Test;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.config.Configuration;
@@ -24,11 +28,6 @@ import org.sonar.api.server.http.HttpRequest;
 import org.sonar.api.server.http.HttpResponse;
 import org.sonar.api.web.FilterChain;
 import org.sonar.api.web.HttpFilter;
-
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 public class AutoLoginFilterTest {
 
@@ -59,7 +58,9 @@ public class AutoLoginFilterTest {
     FilterChain chain = mock(FilterChain.class);
     filter.doFilter(request, response, chain);
 
-    verify(response).sendRedirect(SONAR_URL + "/sessions/init/" + OidcIdentityProvider.KEY + "?return_to=/projects");
+    verify(response)
+        .sendRedirect(
+            SONAR_URL + "/sessions/init/" + OidcIdentityProvider.KEY + "?return_to=/projects");
 
     filter.destroy();
   }
@@ -99,7 +100,8 @@ public class AutoLoginFilterTest {
   public void testFilterTemporarilyDisbled() throws Exception {
     Configuration configurationMock = mock(Configuration.class);
     when(configurationMock.getBoolean(OidcConfiguration.ENABLED)).thenReturn(Optional.of(true));
-    when(configurationMock.get(OidcConfiguration.ISSUER_URI)).thenReturn(Optional.of("http://idp.com"));
+    when(configurationMock.get(OidcConfiguration.ISSUER_URI))
+        .thenReturn(Optional.of("http://idp.com"));
     when(configurationMock.get(OidcConfiguration.CLIENT_ID)).thenReturn(Optional.of("id"));
     when(configurationMock.getBoolean(OidcConfiguration.AUTO_LOGIN)).thenReturn(Optional.of(true));
     when(configurationMock.get(CoreProperties.SERVER_BASE_URL)).thenReturn(Optional.of(SONAR_URL));
@@ -122,5 +124,4 @@ public class AutoLoginFilterTest {
 
     filter.destroy();
   }
-
 }

@@ -17,17 +17,15 @@
  */
 package org.vaulttec.sonarqube.auth.oidc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.sonar.api.*;
 import org.sonar.api.utils.Version;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class AuthOidcPluginTest {
 
   AuthOidcPlugin underTest = new AuthOidcPlugin();
-
-
 
   @Test
   public void test_server_side_extensions() throws Exception {
@@ -43,32 +41,31 @@ public class AuthOidcPluginTest {
     assertThat(context.getExtensions()).isEmpty();
   }
 
+  private Plugin.Context setupContext(SonarQubeSide side) {
 
-  private Plugin.Context setupContext(SonarQubeSide side){
+    SonarRuntime runtime =
+        new SonarRuntime() {
+          @Override
+          public Version getApiVersion() {
+            return Version.create(9, 9);
+          }
 
-    SonarRuntime runtime = new SonarRuntime() {
-      @Override
-      public Version getApiVersion() {
-        return Version.create(9, 9);
-      }
+          @Override
+          public SonarProduct getProduct() {
+            return SonarProduct.SONARQUBE;
+          }
 
-      @Override
-      public SonarProduct getProduct() {
-        return SonarProduct.SONARQUBE;
-      }
+          @Override
+          public SonarQubeSide getSonarQubeSide() {
+            return side;
+          }
 
-      @Override
-      public SonarQubeSide getSonarQubeSide() {
-        return side;
-      }
-
-      @Override
-      public SonarEdition getEdition() {
-        return SonarEdition.COMMUNITY;
-      }
-    };
+          @Override
+          public SonarEdition getEdition() {
+            return SonarEdition.COMMUNITY;
+          }
+        };
 
     return new Plugin.Context(runtime);
   }
-
 }

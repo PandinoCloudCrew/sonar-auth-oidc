@@ -24,14 +24,11 @@ import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.LOGIN_STRATEGY_
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
-
-import org.junit.Before;
-import org.sonar.api.config.Configuration;
-
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.Before;
+import org.sonar.api.config.Configuration;
 
 public abstract class AbstractOidcTest {
 
@@ -46,8 +43,12 @@ public abstract class AbstractOidcTest {
 
   @Before
   public void initConfig() {
-      when(config.get(any())).thenAnswer(invocation -> Optional.of(settings.get(invocation.getArgument(0))));
-      when(config.getBoolean(any())).thenAnswer(invocation -> Optional.of(Boolean.parseBoolean(settings.get(invocation.getArgument(0)))));
+    when(config.get(any()))
+        .thenAnswer(invocation -> Optional.of(settings.get(invocation.getArgument(0))));
+    when(config.getBoolean(any()))
+        .thenAnswer(
+            invocation ->
+                Optional.of(Boolean.parseBoolean(settings.get(invocation.getArgument(0)))));
   }
 
   protected void setSettings(boolean enabled) {
@@ -72,23 +73,38 @@ public abstract class AbstractOidcTest {
 
   protected OIDCProviderMetadata getProviderMetadata(String issuerUri) {
     try {
-      return OIDCProviderMetadata.parse("{\"issuer\":\"" + issuerUri + "\"," + "\"authorization_endpoint\":\""
-          + issuerUri + "/protocol/openid-connect/auth" + "\"," + "\"token_endpoint\":\"" + issuerUri
-          + "/protocol/openid-connect/token\"," + "\"userinfo_endpoint\":\"" + issuerUri
-          + "/protocol/openid-connect/userinfo\"," + "\"jwks_uri\":\"" + issuerUri + "/protocol/openid-connect/certs\","
-          + "\"grant_types_supported\":[\"authorization_code\",\"implicit\",\"refresh_token\",\"password\",\"client_credentials\"],"
-          + "\"response_types_supported\":[\"code\",\"none\",\"id_token\",\"token\",\"id_token token\",\"code id_token\",\"code token\",\"code id_token token\"],"
-          + "\"subject_types_supported\":[\"public\",\"pairwise\"],"
-          + "\"id_token_signing_alg_values_supported\":[\"RS256\"],"
-          + "\"userinfo_signing_alg_values_supported\":[\"RS256\"],"
-          + "\"request_object_signing_alg_values_supported\":[\"none\",\"RS256\"],"
-          + "\"response_modes_supported\":[\"query\",\"fragment\",\"form_post\"],"
-          + "\"token_endpoint_auth_methods_supported\":[\"private_key_jwt\",\"client_secret_basic\",\"client_secret_post\"],"
-          + "\"token_endpoint_auth_signing_alg_values_supported\":[\"RS256\"],"
-          + "\"claims_supported\":[\"sub\",\"iss\",\"auth_time\",\"name\",\"given_name\",\"family_name\",\"preferred_username\",\"email\"],"
-          + "\"claim_types_supported\":[\"normal\"]," + "\"claims_parameter_supported\":false,"
-          + "\"scopes_supported\":[\"openid\",\"offline_access\"]," + "\"request_parameter_supported\":true,"
-          + "\"request_uri_parameter_supported\":true}");
+      return OIDCProviderMetadata.parse(
+          "{\"issuer\":\""
+              + issuerUri
+              + "\","
+              + "\"authorization_endpoint\":\""
+              + issuerUri
+              + "/protocol/openid-connect/auth"
+              + "\","
+              + "\"token_endpoint\":\""
+              + issuerUri
+              + "/protocol/openid-connect/token\","
+              + "\"userinfo_endpoint\":\""
+              + issuerUri
+              + "/protocol/openid-connect/userinfo\","
+              + "\"jwks_uri\":\""
+              + issuerUri
+              + "/protocol/openid-connect/certs\","
+              + "\"grant_types_supported\":[\"authorization_code\",\"implicit\",\"refresh_token\",\"password\",\"client_credentials\"],"
+              + "\"response_types_supported\":[\"code\",\"none\",\"id_token\",\"token\",\"id_token token\",\"code id_token\",\"code token\",\"code id_token token\"],"
+              + "\"subject_types_supported\":[\"public\",\"pairwise\"],"
+              + "\"id_token_signing_alg_values_supported\":[\"RS256\"],"
+              + "\"userinfo_signing_alg_values_supported\":[\"RS256\"],"
+              + "\"request_object_signing_alg_values_supported\":[\"none\",\"RS256\"],"
+              + "\"response_modes_supported\":[\"query\",\"fragment\",\"form_post\"],"
+              + "\"token_endpoint_auth_methods_supported\":[\"private_key_jwt\",\"client_secret_basic\",\"client_secret_post\"],"
+              + "\"token_endpoint_auth_signing_alg_values_supported\":[\"RS256\"],"
+              + "\"claims_supported\":[\"sub\",\"iss\",\"auth_time\",\"name\",\"given_name\",\"family_name\",\"preferred_username\",\"email\"],"
+              + "\"claim_types_supported\":[\"normal\"],"
+              + "\"claims_parameter_supported\":false,"
+              + "\"scopes_supported\":[\"openid\",\"offline_access\"],"
+              + "\"request_parameter_supported\":true,"
+              + "\"request_uri_parameter_supported\":true}");
     } catch (ParseException e) {
       throw new IllegalStateException("Invalid provider metadata", e);
     }
@@ -100,5 +116,4 @@ public abstract class AbstractOidcTest {
     doReturn(mock(IDTokenValidator.class)).when(client).createValidator(any(), any());
     return client;
   }
-
 }

@@ -17,16 +17,15 @@
  */
 package org.vaulttec.sonarqube.auth.oidc;
 
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.server.authentication.Display;
 import org.sonar.api.server.authentication.OAuth2IdentityProvider;
 import org.sonar.api.server.authentication.UserIdentity;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 @ServerSide
 public class OidcIdentityProvider implements OAuth2IdentityProvider {
@@ -38,7 +37,8 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
   private final OidcClient client;
   private final UserIdentityFactory userIdentityFactory;
 
-  public OidcIdentityProvider(OidcConfiguration config, OidcClient client, UserIdentityFactory userIdentityFactory) {
+  public OidcIdentityProvider(
+      OidcConfiguration config, OidcClient client, UserIdentityFactory userIdentityFactory) {
     this.config = config;
     this.client = client;
     this.userIdentityFactory = userIdentityFactory;
@@ -56,7 +56,10 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
 
   @Override
   public Display getDisplay() {
-    return Display.builder().setIconPath(config.iconPath()).setBackgroundColor(config.backgroundColor()).build();
+    return Display.builder()
+        .setIconPath(config.iconPath())
+        .setBackgroundColor(config.backgroundColor())
+        .build();
   }
 
   @Override
@@ -76,7 +79,8 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
       throw new IllegalStateException("OpenID Connect authentication is disabled");
     }
     String state = context.generateCsrfState();
-    AuthenticationRequest authenticationRequest = client.createAuthenticationRequest(context.getCallbackUrl(), state);
+    AuthenticationRequest authenticationRequest =
+        client.createAuthenticationRequest(context.getCallbackUrl(), state);
     LOGGER.debug("Redirecting to authentication endpoint");
     context.redirectTo(authenticationRequest.toURI().toString());
   }
@@ -88,10 +92,12 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
     AuthorizationCode authorizationCode = client.getAuthorizationCode(context.getHttpRequest());
     UserInfo userInfo = client.getUserInfo(authorizationCode, context.getCallbackUrl());
     UserIdentity userIdentity = userIdentityFactory.create(userInfo);
-    LOGGER.debug("Authenticating user '{}' with groups {}", userIdentity.getProviderLogin(), userIdentity.getGroups());
+    LOGGER.debug(
+        "Authenticating user '{}' with groups {}",
+        userIdentity.getProviderLogin(),
+        userIdentity.getGroups());
     context.authenticate(userIdentity);
     LOGGER.debug("Redirecting to requested page");
     context.redirectToRequestedPage();
   }
-
 }

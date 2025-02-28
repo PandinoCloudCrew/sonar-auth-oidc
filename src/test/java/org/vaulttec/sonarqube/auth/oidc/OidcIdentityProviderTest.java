@@ -24,11 +24,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-
 import org.junit.Test;
 import org.sonar.api.server.authentication.Display;
 import org.sonar.api.server.authentication.OAuth2IdentityProvider;
@@ -38,7 +36,8 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
   private UserIdentityFactory userIdentityFactory = mock(UserIdentityFactory.class);
   private OidcClient client = newMockClient();
 
-  private OidcIdentityProvider underTest = new OidcIdentityProvider(oidcConfig, client, userIdentityFactory);
+  private OidcIdentityProvider underTest =
+      new OidcIdentityProvider(oidcConfig, client, userIdentityFactory);
 
   @Test
   public void check_fields() throws Exception {
@@ -80,8 +79,11 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
 
     underTest.init(context);
 
-    verify(context).redirectTo(ISSUER_URI + "/protocol/openid-connect/auth?response_type=code&client_id=id"
-        + "&redirect_uri=http%3A%2F%2Flocalhost%2Fcallback%2Foidc&scope=openid+email+profile&state=state");
+    verify(context)
+        .redirectTo(
+            ISSUER_URI
+                + "/protocol/openid-connect/auth?response_type=code&client_id=id"
+                + "&redirect_uri=http%3A%2F%2Flocalhost%2Fcallback%2Foidc&scope=openid+email+profile&state=state");
   }
 
   @Test
@@ -89,7 +91,8 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
     setSettings(false);
     OAuth2IdentityProvider.InitContext context = mock(OAuth2IdentityProvider.InitContext.class);
 
-    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> underTest.init(context));
+    IllegalStateException exception =
+        assertThrows(IllegalStateException.class, () -> underTest.init(context));
     assertTrue(exception.getMessage().contains("OpenID Connect authentication is disabled"));
   }
 
@@ -109,13 +112,17 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
     AuthenticationRequest request = mock(AuthenticationRequest.class);
     try {
       when(request.toURI())
-          .thenReturn(new URI(ISSUER_URI + "/protocol/openid-connect/auth" + "?response_type=code&client_id=id"
-              + "&redirect_uri=http%3A%2F%2Flocalhost%2Fcallback%2Foidc" + "&scope=openid+email+profile&state=state"));
+          .thenReturn(
+              new URI(
+                  ISSUER_URI
+                      + "/protocol/openid-connect/auth"
+                      + "?response_type=code&client_id=id"
+                      + "&redirect_uri=http%3A%2F%2Flocalhost%2Fcallback%2Foidc"
+                      + "&scope=openid+email+profile&state=state"));
     } catch (URISyntaxException e) {
       // ignore
     }
     when(mockClient.createAuthenticationRequest(CALLBACK_URL, STATE)).thenReturn(request);
     return mockClient;
   }
-
 }

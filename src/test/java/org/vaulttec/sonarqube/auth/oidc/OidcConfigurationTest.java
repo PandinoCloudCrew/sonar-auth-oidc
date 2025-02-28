@@ -17,22 +17,21 @@
  */
 package org.vaulttec.sonarqube.auth.oidc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinitions;
 import org.sonar.api.utils.System2;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.*;
 
 public class OidcConfigurationTest {
 
@@ -44,10 +43,19 @@ public class OidcConfigurationTest {
   private OidcConfiguration underTest = new OidcConfiguration(config);
 
   @Before
-  public void setUp(){
-    PropertyDefinitions definitions = new PropertyDefinitions(System2.INSTANCE, OidcConfiguration.definitions());
-    when(config.get(any())).thenAnswer(invocation -> Optional.ofNullable(settings.get(invocation.getArgument(0))).or(() -> Optional.ofNullable(definitions.getDefaultValue(invocation.getArgument(0)))));
-    when(config.getBoolean(any())).thenAnswer(invocation -> config.get(invocation.getArgument(0)).map(Boolean::parseBoolean));
+  public void setUp() {
+    PropertyDefinitions definitions =
+        new PropertyDefinitions(System2.INSTANCE, OidcConfiguration.definitions());
+    when(config.get(any()))
+        .thenAnswer(
+            invocation ->
+                Optional.ofNullable(settings.get(invocation.getArgument(0)))
+                    .or(
+                        () ->
+                            Optional.ofNullable(
+                                definitions.getDefaultValue(invocation.getArgument(0)))));
+    when(config.getBoolean(any()))
+        .thenAnswer(invocation -> config.get(invocation.getArgument(0)).map(Boolean::parseBoolean));
   }
 
   @Test
@@ -198,5 +206,4 @@ public class OidcConfigurationTest {
     settings.put("sonar.web.context", "sonar");
     assertThat(underTest.getContextPath()).isEqualTo("sonar");
   }
-
 }

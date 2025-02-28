@@ -18,14 +18,6 @@
 package org.vaulttec.sonarqube.auth.oidc;
 
 import java.io.IOException;
-
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.server.http.HttpRequest;
 import org.sonar.api.server.http.HttpResponse;
@@ -41,7 +33,8 @@ public class AutoLoginFilter extends HttpFilter {
   private static final Logger LOGGER = Loggers.get(AutoLoginFilter.class);
 
   private static final String LOGIN_URL = "/sessions/new";
-  private static final String OIDC_URL = "/sessions/init/" + OidcIdentityProvider.KEY + "?return_to=";
+  private static final String OIDC_URL =
+      "/sessions/init/" + OidcIdentityProvider.KEY + "?return_to=";
   private static final String SKIP_REQUEST_PARAM = "auto-login=false";
 
   private final OidcConfiguration config;
@@ -56,14 +49,16 @@ public class AutoLoginFilter extends HttpFilter {
   }
 
   @Override
-  public void doFilter(HttpRequest request, HttpResponse response, FilterChain chain) throws IOException {
+  public void doFilter(HttpRequest request, HttpResponse response, FilterChain chain)
+      throws IOException {
     if (config.isEnabled() && config.isAutoLogin()) {
       String referrer = request.getHeader("referer");
       LOGGER.debug("Referrer: {}", referrer);
 
       // Skip if disabled via request parameter
       if (referrer == null || !referrer.endsWith(SKIP_REQUEST_PARAM)) {
-        String loginPageUrl = config.getBaseUrl() + OIDC_URL + config.getContextPath() + "/projects";
+        String loginPageUrl =
+            config.getBaseUrl() + OIDC_URL + config.getContextPath() + "/projects";
         LOGGER.debug("Redirecting to OIDC login page: {}", loginPageUrl);
         response.sendRedirect(loginPageUrl);
         return;
@@ -73,12 +68,12 @@ public class AutoLoginFilter extends HttpFilter {
   }
 
   @Override
-  public void init(){
+  public void init() {
     // Not needed here
   }
+
   @Override
   public void destroy() {
     // Not needed here
   }
-
 }

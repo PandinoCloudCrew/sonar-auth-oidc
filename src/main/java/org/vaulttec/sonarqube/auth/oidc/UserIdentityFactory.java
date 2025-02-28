@@ -17,20 +17,17 @@
  */
 package org.vaulttec.sonarqube.auth.oidc;
 
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import org.sonar.api.server.ServerSide;
-import org.sonar.api.server.authentication.UserIdentity;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static java.lang.String.format;
 import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.*;
 
-/**
- * Converts OpenID Connect {@link UserInfo} to SonarQube {@link UserIdentity}.
- */
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.sonar.api.server.ServerSide;
+import org.sonar.api.server.authentication.UserIdentity;
+
+/** Converts OpenID Connect {@link UserInfo} to SonarQube {@link UserIdentity}. */
 @ServerSide
 public class UserIdentityFactory {
 
@@ -41,8 +38,12 @@ public class UserIdentityFactory {
   }
 
   public UserIdentity create(UserInfo userInfo) {
-    UserIdentity.Builder builder = UserIdentity.builder().setProviderId(userInfo.getSubject().getValue())
-        .setProviderLogin(getLogin(userInfo)).setName(getName(userInfo)).setEmail(userInfo.getEmailAddress());
+    UserIdentity.Builder builder =
+        UserIdentity.builder()
+            .setProviderId(userInfo.getSubject().getValue())
+            .setProviderLogin(getLogin(userInfo))
+            .setName(getName(userInfo))
+            .setEmail(userInfo.getEmailAddress());
     if (config.syncGroups()) {
       builder.setGroups(getGroups(userInfo));
     }
@@ -51,31 +52,36 @@ public class UserIdentityFactory {
 
   private String getLogin(UserInfo userInfo) {
     switch (config.loginStrategy()) {
-    case LOGIN_STRATEGY_PREFERRED_USERNAME:
-      if (userInfo.getPreferredUsername() == null) {
-        throw new IllegalStateException("Claim 'preferred_username' is missing in user info - "
-            + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
-      }
-      return userInfo.getPreferredUsername();
-    case LOGIN_STRATEGY_PROVIDER_ID:
-      return userInfo.getSubject().getValue();
-    case LOGIN_STRATEGY_EMAIL:
-      if (userInfo.getEmailAddress() == null) {
-        throw new IllegalStateException("Claim 'email' is missing in user info - "
-            + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
-      }
-      return userInfo.getEmailAddress();
-    case LOGIN_STRATEGY_UNIQUE:
-      return generateUniqueLogin(userInfo);
-    case LOGIN_STRATEGY_CUSTOM_CLAIM:
-      if (userInfo.getStringClaim(config.loginStrategyCustomClaimName()) == null) {
+      case LOGIN_STRATEGY_PREFERRED_USERNAME:
+        if (userInfo.getPreferredUsername() == null) {
+          throw new IllegalStateException(
+              "Claim 'preferred_username' is missing in user info - "
+                  + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
+        }
+        return userInfo.getPreferredUsername();
+      case LOGIN_STRATEGY_PROVIDER_ID:
+        return userInfo.getSubject().getValue();
+      case LOGIN_STRATEGY_EMAIL:
+        if (userInfo.getEmailAddress() == null) {
+          throw new IllegalStateException(
+              "Claim 'email' is missing in user info - "
+                  + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
+        }
+        return userInfo.getEmailAddress();
+      case LOGIN_STRATEGY_UNIQUE:
+        return generateUniqueLogin(userInfo);
+      case LOGIN_STRATEGY_CUSTOM_CLAIM:
+        if (userInfo.getStringClaim(config.loginStrategyCustomClaimName()) == null) {
+          throw new IllegalStateException(
+              "Custom claim '"
+                  + config.loginStrategyCustomClaimName()
+                  + "' is missing in user info - "
+                  + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
+        }
+        return userInfo.getStringClaim(config.loginStrategyCustomClaimName());
+      default:
         throw new IllegalStateException(
-            "Custom claim '" + config.loginStrategyCustomClaimName() + "' is missing in user info - "
-                + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
-      }
-      return userInfo.getStringClaim(config.loginStrategyCustomClaimName());
-    default:
-      throw new IllegalStateException(format("Login strategy not supported: %s", config.loginStrategy()));
+            format("Login strategy not supported: %s", config.loginStrategy()));
     }
   }
 
@@ -86,8 +92,9 @@ public class UserIdentityFactory {
   private String getName(UserInfo userInfo) {
     String name = userInfo.getName() != null ? userInfo.getName() : userInfo.getPreferredUsername();
     if (name == null) {
-      throw new IllegalStateException("Claims 'name' and 'preferred_username' are missing in user info - "
-          + "make sure your OIDC provider supports at least one of these claims in the id token or at the user info endpoint");
+      throw new IllegalStateException(
+          "Claims 'name' and 'preferred_username' are missing in user info - "
+              + "make sure your OIDC provider supports at least one of these claims in the id token or at the user info endpoint");
     }
     return name;
   }
@@ -95,8 +102,11 @@ public class UserIdentityFactory {
   private Set<String> getGroups(UserInfo userInfo) {
     Object groupsClaim = userInfo.getClaim(config.syncGroupsClaimName());
     if (groupsClaim == null) {
-      throw new IllegalStateException("Groups claim '" + config.syncGroupsClaimName() + "' is missing in user info - "
-          + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
+      throw new IllegalStateException(
+          "Groups claim '"
+              + config.syncGroupsClaimName()
+              + "' is missing in user info - "
+              + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
     }
     List<String> groups;
     if (groupsClaim instanceof List) {
@@ -104,9 +114,10 @@ public class UserIdentityFactory {
     } else { // String
       if (((String) groupsClaim).contains(",")) {
         // comma-separated list of groups
-        groups = Stream.of(((String) groupsClaim).split(","))
-            .map(String::trim)
-            .collect(Collectors.toList());
+        groups =
+            Stream.of(((String) groupsClaim).split(","))
+                .map(String::trim)
+                .collect(Collectors.toList());
       } else {
         // single group
         groups = Collections.singletonList((String) groupsClaim);
@@ -114,5 +125,4 @@ public class UserIdentityFactory {
     }
     return new HashSet<>(groups);
   }
-
 }
