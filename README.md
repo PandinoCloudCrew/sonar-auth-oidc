@@ -3,6 +3,8 @@
 
 ## Description
 
+Continuation of [sonar-auth-oidc/sonar-auth-oidc](https://github.com/sonar-auth-oidc/sonar-auth-oidc). This project has been stale for a while, we will try to maintain it.
+
 This plugin enables users to automatically be sign up and authenticated on a SonarQube server via an [OpenID Connect](http://openid.net/connect/) identity provider like [Keycloak](http://www.keycloak.org).
 ![SonarQube Login](docs/images/login.png)
 
