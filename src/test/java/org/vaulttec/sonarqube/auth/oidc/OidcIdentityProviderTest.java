@@ -38,7 +38,7 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
   private UserIdentityFactory userIdentityFactory = mock(UserIdentityFactory.class);
   private OidcClient client = newMockClient();
 
-  private OidcIdentityProvider underTest = new OidcIdentityProvider(config, client, userIdentityFactory);
+  private OidcIdentityProvider underTest = new OidcIdentityProvider(oidcConfig, client, userIdentityFactory);
 
   @Test
   public void check_fields() throws Exception {
@@ -47,18 +47,18 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
 
   @Test
   public void custom_name() throws Exception {
-    settings.setProperty(OidcConfiguration.LOGIN_BUTTON_TEXT, "My text");
+    settings.put(OidcConfiguration.LOGIN_BUTTON_TEXT, "My text");
     assertThat(underTest.getName()).isEqualTo("My text");
   }
 
   @Test
   public void is_enabled() throws Exception {
-    settings.setProperty(OidcConfiguration.ENABLED, true);
-    settings.setProperty(OidcConfiguration.ISSUER_URI, ISSUER_URI);
-    settings.setProperty(OidcConfiguration.CLIENT_ID, "id");
+    settings.put(OidcConfiguration.ENABLED, "true");
+    settings.put(OidcConfiguration.ISSUER_URI, ISSUER_URI);
+    settings.put(OidcConfiguration.CLIENT_ID, "id");
     assertThat(underTest.isEnabled()).isTrue();
 
-    settings.setProperty(OidcConfiguration.ENABLED, false);
+    settings.put(OidcConfiguration.ENABLED, "false");
     assertThat(underTest.isEnabled()).isFalse();
   }
 
@@ -66,7 +66,7 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
   public void should_allow_users_to_signup() {
     assertThat(underTest.allowsUsersToSignUp()).as("default").isFalse();
 
-    settings.setProperty(OidcConfiguration.ALLOW_USERS_TO_SIGN_UP, true);
+    settings.put(OidcConfiguration.ALLOW_USERS_TO_SIGN_UP, "true");
     assertThat(underTest.allowsUsersToSignUp()).isTrue();
   }
 
@@ -76,7 +76,7 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
     OAuth2IdentityProvider.InitContext context = mock(OAuth2IdentityProvider.InitContext.class);
     when(context.generateCsrfState()).thenReturn(STATE);
     when(context.getCallbackUrl()).thenReturn(CALLBACK_URL);
-    settings.setProperty(OidcConfiguration.ISSUER_URI, ISSUER_URI);
+    settings.put(OidcConfiguration.ISSUER_URI, ISSUER_URI);
 
     underTest.init(context);
 
@@ -95,8 +95,8 @@ public class OidcIdentityProviderTest extends AbstractOidcTest {
 
   @Test
   public void display() {
-    settings.setProperty(OidcConfiguration.ICON_PATH, "my_path");
-    settings.setProperty(OidcConfiguration.BACKGROUND_COLOR, "#123456");
+    settings.put(OidcConfiguration.ICON_PATH, "my_path");
+    settings.put(OidcConfiguration.BACKGROUND_COLOR, "#123456");
 
     Display display = underTest.getDisplay();
     assertThat(display).isNotNull();
